@@ -2,9 +2,9 @@ from fastapi import FastAPI, Query, Body
 
 
 hotels = [
-    {"id": 1, "title": "sochi"},
-    {"id": 2, "title": "dubai"},
-    {"id": 3, "title": "moscow"},
+    {"id": 2, "title": "dubai", "name": "дубай"},
+    {"id": 1, "title": "sochi", "name": "сочи"},
+    {"id": 3, "title": "moscow", "name": "москва"},
 ]
 
 app = FastAPI()
@@ -15,7 +15,7 @@ def func():
     return "Hello, world"
 
 
-@app.get("/hotels", description="Здесь описание метода")
+@app.get("/hotels")
 def get_hotels(
     id: int | None = Query(default=None, description="идентификатор отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
@@ -31,20 +31,14 @@ def get_hotels(
     return hotels_
 
 
-@app.post(
-    "/hotels", summary="добавление отеля", description="<h1>Здесь описание метода</h1>"
-)
+@app.post("/hotels")
 def create_hotel(title: str = Body(embed=True)):
     global hotels
     hotels.append({"id": hotels[-1]["id"] + 1, "data": title})
     return {"status": "OK"}
 
 
-@app.put(
-    "/hotels/{hotel_id}",
-    summary="замена данных отеля",
-    description="Здесь описание метода",
-)
+@app.put("/hotels/{hotel_id}")
 def edit_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
     global hotels
     hotels[hotel_id - 1]["title"] = title
@@ -52,10 +46,8 @@ def edit_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
     return {"status": "OK"}
 
 
-@app.patch("/hotels/{hotel_id}", summary="Частичная замена данных отеля")
-def edit_hotel(
-    hotel_id: int | None, title: str | None = Body(None), name: str | None = Body(None)
-):
+@app.patch("/hotels/{hotel_id}")
+def edit_hotel(hotel_id: int, title: str = Body(None), name: str = Body(None)):
     global hotels
     if title:
         hotels[hotel_id - 1]["title"] = title
