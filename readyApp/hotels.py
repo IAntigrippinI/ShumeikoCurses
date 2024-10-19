@@ -8,6 +8,10 @@ hotels = [
     {"id": 1, "title": "sochi", "name": "sss"},
     {"id": 2, "title": "dubai", "name": "ddd"},
     {"id": 3, "title": "moscow", "name": "mmm"},
+    {"id": 4, "title": "moscow", "name": "mmm"},
+    {"id": 5, "title": "moscow", "name": "mmm"},
+    {"id": 6, "title": "moscow", "name": "mmm"},
+    {"id": 7, "title": "moscow", "name": "mmm"},
 ]
 
 
@@ -20,6 +24,8 @@ def func():
 def get_hotels(
     id: int | None = Query(default=None, description="идентификатор отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
+    page: int | None = Query(default=1, description="Страница"),
+    per_page: int | None = Query(default=3, description="Кол-во объектов на странице"),
 ):
 
     hotels_ = []
@@ -29,7 +35,7 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    return hotels_
+    return hotels_[(page - 1) * per_page : page * per_page]
 
 
 @router.post(
