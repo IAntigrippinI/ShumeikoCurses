@@ -12,3 +12,18 @@ env.py:
 для создания миграций: alembic revision --autogenerate -m "<COMMENT>"
 
 для запуска миграций: alembic upgrade <number revision> или head # head - последняя
+
+для отката миграций: alembic downgrade <number revision> # number revision - id миграции (в файлах с функциями миграций)
+
+
+для форматирования миграций (адекватный названий): 
+    раскомментировать:
+    hooks = black
+    black.type = console_scripts
+    black.entrypoint = black
+    black.options = -l 79 REVISION_SCRIPT_FILENAME 
+    - 79 заменить на 88 
+    установить библиотеку black
+
+    раскомментировать
+    file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
