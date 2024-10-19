@@ -1,0 +1,14 @@
+для создания миграций
+alembic init [path_to_new_folder_migrat]
+
+после в файле alembic.ini поле prepend_sys_path = . src
+
+env.py:
+    первый targetmetadata=Base.metadata (класс для описания всех моделей)
+    также в этот файл испортировать все классы моделей для бд
+    config.set_main_option("sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True")#settings.DB_URL- адресс к таблице. после ? параметр для синхронной миграции, когда используем асинхронный движок для бд
+
+
+для создания миграций: alembic revision --autogenerate -m "<COMMENT>"
+
+для запуска миграций: alembic upgrade <number revision> или head # head - последняя
