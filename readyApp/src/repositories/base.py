@@ -44,6 +44,11 @@ class BaseRepository:
         delete_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_stmt)
 
+    async def get_by_id(self, id: int):
+        query = select(self.model).filter_by(id=id)
+        result = await self.session.execute(query)
+        return result.scalars().one_or_none()
+
     # async def delete(self, filter_by: BaseModel): # вариант с фильтрацией через многие признаки
     #     query = delete(self.model).filter_by(**filter_by.model_dump())
     #     await self.session.execute(query)
