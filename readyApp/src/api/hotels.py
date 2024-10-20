@@ -25,6 +25,10 @@ hotels = [
 ]
 
 
+@router.get("/{hotel_id}")
+def get_hotel(hotel_id: int): ...
+
+
 @router.get(
     "",
     description="Здесь описание метода",
@@ -92,22 +96,24 @@ async def create_hotel(
     summary="замена данных отеля",
     description="Здесь описание метода",
 )
-async def edit_hotel(hotel_data: Hotel, hotel_new_data: Hotel):
+async def edit_hotel(hotel_id: int, hotel_data: Hotel):
     async with async_session_maker() as session:
-        await HotelsRepository(session).edit(hotel_data, hotel_new_data)
+        await HotelsRepository(session).edit(data=hotel_data, id=hotel_id)
         await session.commit()
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частичная замена данных отеля")
 async def edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH):
-
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, is_patch=True, id=hotel_id)
+        await session.commit()
     return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}")
-async def delete_hotel(hotel_data: Hotel):
+async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
-        await HotelsRepository(session).delete(hotel_data)
+        await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
     return {"status": "OK"}

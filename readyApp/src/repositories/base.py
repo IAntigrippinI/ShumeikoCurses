@@ -32,14 +32,18 @@ class BaseRepository:
         result = await self.session.execute(add_data_stmt)
         return result.scalars().one()
 
-    async def edit(self, filter_by: BaseModel, data: BaseModel):
-        query = (
+    async def edit(self, data: BaseModel, is_patch: bool = False, **filter_by):
+        update_stmt = (
             update(self.model)
-            .filter_by(**filter_by.model_dump())
-            .values(**data.model_dump())
+            .filter_by(**filter_by)
+            .values(**data.model_dump(exclude_unset=is_patch))
         )
-        await self.session.execute(query)
+        await self.session.execute(update_stmt)
 
-    async def delete(self, filter_by: BaseModel):
-        query = delete(self.model).filter_by(**filter_by.model_dump())
-        await self.session.execute(query)
+    async def delete(self, **filter_by):
+        delete_stmt = delete(self.model).filter_by(**filter_by)
+        await self.session.execute(delete_stmt)
+
+    # async def delete(self, filter_by: BaseModel): # вариант с фильтрацией через многие признаки
+    #     query = delete(self.model).filter_by(**filter_by.model_dump())
+    #     await self.session.execute(query)
