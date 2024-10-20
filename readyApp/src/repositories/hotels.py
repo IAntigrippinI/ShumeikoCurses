@@ -26,12 +26,3 @@ class HotelsRepository(BaseRepository):
 
         result = await self.session.execute(query)
         return result.scalars().all()
-
-    async def add(self, title, location):
-        add_hotel_stmt = insert(HotelsOrm).values(title=title, location=location)
-        # print(
-        #     add_hotel_stmt.compile(compile_kwargs={"literal_binds": True})
-        # )  # для вывода скомпилированного запроса SQL
-
-        await self.session.execute(add_hotel_stmt)
-        return add_hotel_stmt.compile().params
