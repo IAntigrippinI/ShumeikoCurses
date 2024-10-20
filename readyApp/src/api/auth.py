@@ -16,8 +16,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def registrer_user(data: UserRequestsAdd):
     hashed_password = pwd_context.hash(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
-    async with async_session_maker() as session:
-        await UsersRepository(session).add(new_user_data)
-        await session.commit()
+    try:
+        async with async_session_maker() as session:
+            await UsersRepository(session).add(new_user_data)
+            await session.commit()
 
-    return {"status": "OK"}
+        return {"status": "OK"}
+    except:
+        return {"status": "error", "message": "email is busy"}
