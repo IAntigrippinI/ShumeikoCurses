@@ -35,7 +35,7 @@ def func():
 )  # response_model=list[SchemaHotel] для валидации выходных данных
 async def get_hotels(
     paginatios: PaginationDep,
-    id: int | None = Query(default=None, description="идентификатор отеля"),
+    location: str | None = Query(default=None, description="Локация отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
     # per_page: int | None = Query(
     #     default=3, description="Кол-во объектов на странице", gt=1, lt=100
@@ -45,10 +45,10 @@ async def get_hotels(
     async with async_session_maker() as session:
 
         query = select(HotelsOrm)
-        if id:
-            query = query.filter_by(id=id)
+        if location:
+            query = query.filter(HotelsOrm.location.like(f"%{location}%"))
         if title:
-            query = query.filter_by(title=title)
+            query = query.filter(HotelsOrm.title.like(f"%{title}%"))
         query = query.limit(paginatios.per_page).offset(
             paginatios.per_page * (paginatios.page - 1)
         )
