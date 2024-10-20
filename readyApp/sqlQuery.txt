@@ -1,0 +1,3 @@
+select id,title from hotels where id = 1 and title = " "  
+limit 5 - ск-ко будет отдано
+offset 0 - смещение (пагианция) = limit*page - всегда кратна limit

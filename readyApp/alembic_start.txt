@@ -16,7 +16,7 @@ env.py:
 для отката миграций: alembic downgrade <number revision> # number revision - id миграции (в файлах с функциями миграций)
 
 
-для форматирования миграций (адекватный названий): 
+для форматирования миграций (адекватный названий) alembic.ini: 
     раскомментировать:
     hooks = black
     black.type = console_scripts

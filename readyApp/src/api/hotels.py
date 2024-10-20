@@ -37,25 +37,29 @@ async def get_hotels(
     paginatios: PaginationDep,
     id: int | None = Query(default=None, description="идентификатор отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
-    # page: int | None = Query(default=1, description="Страница", gt=1),
     # per_page: int | None = Query(
     #     default=3, description="Кол-во объектов на странице", gt=1, lt=100
     # ),  ## gt  минимальное значение, lt максимальное значение, ge больше или равен
 ):
 
     async with async_session_maker() as session:
+
         query = select(HotelsOrm)
+        if id:
+            query = query.filter_by(id=id)
+        if title:
+            query = query.filter_by(title=title)
+        query = query.limit(paginatios.per_page).offset(
+            paginatios.per_page * (paginatios.page - 1)
+        )
+
         result = await session.execute(query)
         hotels = result.scalars().all()
         # first = result.first()
         # result.one()  # выдаст ошибку, если вернулось ноль или больше одного
         # result.one_or_none()  # для проверки, вернулось ничего или один, в противном случае выдаст ошибку
     print(type(hotels), hotels)
-    # return hotels_[
-    #     (paginatios.page - 1)
-    #     * paginatios.per_page : paginatios.page
-    #     * paginatios.per_page
-    # ]
+
     return hotels  # вернется адекватный json, хотя при выводе в консоль будут выводиться названия классов и адреса в памяти
 
 
@@ -75,8 +79,8 @@ async def create_hotel(
             "2": {
                 "summary": "Владивосток",
                 "value": {
-                    "title": "Отель СПА ВДК",
-                    "location": "Владивостока, ул. 1, 1",
+                    "title": "Отель СПА",
+                    "location": "Владивосток, ул. 1, 1",
                 },
             },
         }
