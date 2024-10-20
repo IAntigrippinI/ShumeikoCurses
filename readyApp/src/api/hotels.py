@@ -1,6 +1,6 @@
 from fastapi import Query, Body, APIRouter
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, func
 
 from src.models.hotels import HotelsOrm
 from src.schemas.hotels import Hotel, HotelPATCH, SchemaHotel
@@ -9,6 +9,7 @@ from src.schemas.hotels import Hotel, HotelPATCH, SchemaHotel
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
 from src.database import engine
+from src.repositories.hotels import HotelsRepository
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -22,11 +23,6 @@ hotels = [
     {"id": 6, "title": "moscow", "name": "mmm"},
     {"id": 7, "title": "moscow", "name": "mmm"},
 ]
-
-
-@router.get("/")
-def func():
-    return "Hello, world"
 
 
 @router.get(
@@ -44,23 +40,19 @@ async def get_hotels(
 
     async with async_session_maker() as session:
 
-        query = select(HotelsOrm)
-        if location:
-            query = query.filter(HotelsOrm.location.like(f"%{location}%"))
-        if title:
-            query = query.filter(HotelsOrm.title.like(f"%{title}%"))
-        query = query.limit(paginatios.per_page).offset(
-            paginatios.per_page * (paginatios.page - 1)
+        return await HotelsRepository(session).get_all(
+            location=location,
+            title=title,
+            limit=paginatios.per_page,
+            offset=paginatios.per_page * (paginatios.page - 1),
         )
 
-        result = await session.execute(query)
-        hotels = result.scalars().all()
         # first = result.first()
         # result.one()  # выдаст ошибку, если вернулось ноль или больше одного
         # result.one_or_none()  # для проверки, вернулось ничего или один, в противном случае выдаст ошибку
-    print(type(hotels), hotels)
 
-    return hotels  # вернется адекватный json, хотя при выводе в консоль будут выводиться названия классов и адреса в памяти
+
+# return hotels  # вернется адекватный json, хотя при выводе в консоль будут выводиться названия классов и адреса в памяти
 
 
 @router.post(
@@ -88,13 +80,13 @@ async def create_hotel(
 ):
 
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
-        print(
-            add_hotel_stmt.compile(engine, compile_kwargs={"literal_binds": True})
-        )  # для вывода скомпилированного запроса SQL
-        await session.execute(add_hotel_stmt)
+
+        hotel = await HotelsRepository(session).add(
+            hotel_data.title, hotel_data.location
+        )
+        print(hotel)
         await session.commit()
-    return {"status": "OK"}
+        return {"status": "OK", "data": hotel}
 
 
 @router.put(
