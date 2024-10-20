@@ -40,4 +40,13 @@ async def login_user(data: UserRequestsAdd, responce: Response):
 
 
 @router.get("/only_auth")
-async def only_auth(requests: Request): ...
+async def only_auth(requests: Request):
+    if requests.scope["headers"][-5][1].decode("utf-8").split("=")[0] == "access_token":
+        access_token = requests.scope["headers"][-5][1].decode("utf-8").split("=")[0]
+    else:
+        access_token = None
+
+    if access_token:
+        return True
+    else:
+        return False
