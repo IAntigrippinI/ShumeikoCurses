@@ -1,4 +1,4 @@
-from sqlalchemy import func, select, insert
+from sqlalchemy import func, select, insert, update, delete
 from src.models.hotels import HotelsOrm
 from pydantic import BaseModel
 
@@ -31,3 +31,15 @@ class BaseRepository:
 
         result = await self.session.execute(add_data_stmt)
         return result.scalars().one()
+
+    async def edit(self, filter_by: BaseModel, data: BaseModel):
+        query = (
+            update(self.model)
+            .filter_by(**filter_by.model_dump())
+            .values(**data.model_dump())
+        )
+        await self.session.execute(query)
+
+    async def delete(self, filter_by: BaseModel):
+        query = delete(self.model).filter_by(**filter_by.model_dump())
+        await self.session.execute(query)

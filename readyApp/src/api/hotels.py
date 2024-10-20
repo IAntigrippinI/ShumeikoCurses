@@ -92,25 +92,22 @@ async def create_hotel(
     summary="замена данных отеля",
     description="Здесь описание метода",
 )
-def edit_hotel(hotel_id: int, hotel_data: Hotel):
-    global hotels
-    hotels[hotel_id - 1]["title"] = hotel_data.title
-    hotels[hotel_id - 1]["name"] = hotel_data.name
+async def edit_hotel(hotel_data: Hotel, hotel_new_data: Hotel):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, hotel_new_data)
+        await session.commit()
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частичная замена данных отеля")
-def edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH):
-    global hotels
-    if hotel_data.title:
-        hotels[hotel_id - 1]["title"] = hotel_data.title
-    if hotel_data.name:
-        hotels[hotel_id - 1]["name"] = hotel_data.name
+async def edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH):
+
     return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+async def delete_hotel(hotel_data: Hotel):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(hotel_data)
+        await session.commit()
     return {"status": "OK"}
