@@ -14,3 +14,7 @@ class UserAdd(BaseModel):
 class User(BaseModel):
     id: int
     email: EmailStr
+
+
+class UserWithHashPassword(User):
+    hashed_password: str

@@ -26,10 +26,12 @@ class BaseRepository:
         result = await self.session.execute(query)
 
         model = result.scalars().one_or_none()
+        # print(query.compile(compile_kwargs={"literal_binds": True}))
         if model is None:
             return None
         else:
-            self.schema.model_validate(model, from_attributes=True)
+
+            return self.schema.model_validate(model, from_attributes=True)
 
     async def add(self, data: BaseModel):
         add_data_stmt = (
@@ -55,10 +57,10 @@ class BaseRepository:
         delete_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_stmt)
 
-    async def get_one_or_none(self, id: int):
-        query = select(self.model).filter_by(id=id)
-        result = await self.session.execute(query)
-        return result.scalars().one_or_none()
+    # async def get_one_or_none(self, id: int):
+    #     query = select(self.model).filter_by(id=id)
+    #     result = await self.session.execute(query)
+    #     return result.scalars().one_or_none()
 
     # async def delete(self, filter_by: BaseModel): # вариант с фильтрацией через многие признаки
     #     query = delete(self.model).filter_by(**filter_by.model_dump())
