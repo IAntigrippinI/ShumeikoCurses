@@ -4,6 +4,7 @@ from src.schemas.users import UserRequestsAdd, UserAdd
 from src.repositories.users import UsersRepository
 from src.database import async_session_maker
 from src.services.auth import AuthService
+from src.api.dependencies import UserIdDep
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
@@ -39,14 +40,15 @@ async def login_user(data: UserRequestsAdd, responce: Response):
         return {"access token": access_token}
 
 
-@router.get("/only_auth")
-async def only_auth(requests: Request):
-    if requests.scope["headers"][-5][1].decode("utf-8").split("=")[0] == "access_token":
-        access_token = requests.scope["headers"][-5][1].decode("utf-8").split("=")[0]
-    else:
-        access_token = None
+@router.get("/me")
+async def get_me(requests: Request, user_id: UserIdDep):
 
-    if access_token:
-        return True
-    else:
-        return False
+    async with async_session_maker() as session:
+        user = await UsersRepository(session).get_one_or_none(id=user_id)
+    return user
+
+
+@router.get("/logout")
+def logout(responce: Response):
+    responce.delete_cookie("access_token")
+    return "OK"
