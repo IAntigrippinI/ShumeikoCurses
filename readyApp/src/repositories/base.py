@@ -15,10 +15,21 @@ class BaseRepository:
 
         query = select(self.model)
         result = await self.session.execute(query)
-        return [
-            self.schema.model_validate(model, from_attributes=True)
-            for model in result.scalars().all()
-        ]
+
+    async def get_by_filters(self, **filter):
+        query = select(self.model).filter_by(**filter)
+        result = await self.session.execute(query)
+
+        model = result.scalars().all()
+        print(query.compile(compile_kwargs={"literal_binds": True}))
+        if model is None:
+            return None
+        else:
+            return model
+            return [
+                self.schema.model_validate(model, from_attributes=True)
+                for model in result.scalars().all()
+            ]
 
     async def get_one_or_none(self, **filter):
 
