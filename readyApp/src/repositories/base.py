@@ -11,12 +11,7 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_all(self, *args, **kwargs):
-
-        query = select(self.model)
-        result = await self.session.execute(query)
-
-    async def get_by_filters(self, **filter):
+    async def get_filtered(self, **filter):
         query = select(self.model).filter_by(**filter)
         result = await self.session.execute(query)
 
@@ -30,6 +25,9 @@ class BaseRepository:
                 self.schema.model_validate(model, from_attributes=True)
                 for model in result.scalars().all()
             ]
+
+    async def get_all(self, *args, **kwargs):
+        return await self.get_filtered()
 
     async def get_one_or_none(self, **filter):
 
@@ -57,6 +55,7 @@ class BaseRepository:
         return self.schema.model_validate(model, from_attributes=True)
 
     async def edit(self, data: BaseModel, is_patch: bool = False, **filter_by):
+        print(is_patch)
         update_stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -67,12 +66,3 @@ class BaseRepository:
     async def delete(self, **filter_by):
         delete_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_stmt)
-
-    # async def get_one_or_none(self, id: int):
-    #     query = select(self.model).filter_by(id=id)
-    #     result = await self.session.execute(query)
-    #     return result.scalars().one_or_none()
-
-    # async def delete(self, filter_by: BaseModel): # вариант с фильтрацией через многие признаки
-    #     query = delete(self.model).filter_by(**filter_by.model_dump())
-    #     await self.session.execute(query)
