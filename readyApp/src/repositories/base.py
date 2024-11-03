@@ -1,6 +1,4 @@
 from sqlalchemy import func, select, insert, update, delete
-from src.models.hotels import HotelsOrm
-from src.schemas.hotels import Hotel
 from pydantic import BaseModel
 
 
@@ -14,17 +12,8 @@ class BaseRepository:
     async def get_filtered(self, **filter):
         query = select(self.model).filter_by(**filter)
         result = await self.session.execute(query)
-
-        model = result.scalars().all()
         print(query.compile(compile_kwargs={"literal_binds": True}))
-        if model is None:
-            return None
-        else:
-            # return model
-            return [
-                self.schema.model_validate(model, from_attributes=True)
-                for model in result.scalars().all()
-            ]
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def get_all(self, *args, **kwargs):
         return await self.get_filtered()
