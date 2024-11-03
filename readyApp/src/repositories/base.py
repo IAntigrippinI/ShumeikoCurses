@@ -20,7 +20,7 @@ class BaseRepository:
         if model is None:
             return None
         else:
-            return model
+            # return model
             return [
                 self.schema.model_validate(model, from_attributes=True)
                 for model in result.scalars().all()
