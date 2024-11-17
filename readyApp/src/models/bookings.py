@@ -1,6 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, DATETIME
+from sqlalchemy import ForeignKey, DATETIME, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 from src.database import Base
@@ -15,6 +15,7 @@ class BookingsOrm(Base):
     date_from: Mapped[date]
     date_to: Mapped[date]
     price: Mapped[int]
+    create_at: Mapped[datetime.timestamp] = mapped_column(TIMESTAMP)
 
     @hybrid_property
     def total_cost(self) -> int:
