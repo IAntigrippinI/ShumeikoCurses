@@ -1,3 +1,23 @@
 select id,title from hotels where id = 1 and title = " "  
 limit 5 - ск-ко будет отдано
 offset 0 - смещение (пагианция) = limit*page - всегда кратна limit
+
+
+получение незанятых номеров
+
+
+
+with rooms_booked as (
+	select room_id, count(*) as busy_rooms
+	from bookings 
+	where date_from <='2024-11-18' and date_to >='2024-11-17'
+	group by room_id
+	),  # получаем количество занятых комнат
+free_rooms_tbl as (
+	select rooms.id as room_id, rooms.hotel_id, rooms.quantity-coalesce(rooms_booked.busy_rooms, 0) as free_rooms, rooms.quantity, rooms_booked.busy_rooms 
+	from rooms 
+	left join rooms_booked on
+	rooms.id=rooms_booked.room_id
+) # получаем количество оставшихся мест в комнатах
+select * from free_rooms_tbl
+where free_rooms > 0; # забираем только свободные номера

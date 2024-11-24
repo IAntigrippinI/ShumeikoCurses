@@ -4,17 +4,23 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
 from src.database import Base
+
+from src.config import settings
+
 from src.models.bookings import BookingsOrm
 from src.models.users import UsersOrm
-from src.models.hotels import HotelsOrm
 from src.models.rooms import RoomsOrm
-from src.config import settings
+from src.models.hotels import HotelsOrm
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True")
+config.set_main_option(
+    "sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True"
+)  # settings.DB_URL- адресс к таблице. после ? параметр для синхронной миграции, когда используем асинхронный движок для бд
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
