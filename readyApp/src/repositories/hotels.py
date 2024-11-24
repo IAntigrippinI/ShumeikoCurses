@@ -9,6 +9,7 @@ from src.models.rooms import RoomsOrm
 from src.schemas.hotels import Hotel
 from src.repositories.utils import rooms_ids_for_booking
 
+
 class HotelsRepository(BaseRepository):
     model = HotelsOrm
     schema = Hotel
@@ -35,8 +36,29 @@ class HotelsRepository(BaseRepository):
             for hotel in result.scalars().all()
         ]
 
-
-    async def get_filtered_by_time(self, date_from: date, date_to: date):
+    async def get_filtered_by_time(
+        self,
+        date_from: date,
+        date_to: date,
+        location: str,
+        title: str,
+        pagination,
+    ):
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
-        hotel_ids_to_get = select(RoomsOrm.hotel_id).select_from(RoomsOrm).filter(RoomsOrm.hotel_id.in_(rooms_ids_to_get))
+        hotel_ids_to_get = (
+            select(RoomsOrm.hotel_id)
+            .select_from(RoomsOrm)
+            .filter(RoomsOrm.hotel_id.in_(rooms_ids_to_get))
+        )
+        if location:
+            hotel_ids_to_get = hotel_ids_to_get.filter(
+                HotelsOrm.location.ilike(f"%{location}%")
+            )
+        if title:
+            hotel_ids_to_get = hotel_ids_to_get.filter(
+                HotelsOrm.title.ilike(f"%{title}%")
+            )
+        hotel_ids_to_get = hotel_ids_to_get.limit(pagination.per_page).offset(
+            (pagination.page - 1) * pagination.per_page
+        )
         return await self.get_filtered(HotelsOrm.id.in_(hotel_ids_to_get))

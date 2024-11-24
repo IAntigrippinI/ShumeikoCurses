@@ -37,7 +37,7 @@ async def get_hotel(hotel_id: int, db: DBDep):
     description="Здесь описание метода",
 )  # response_model=list[SchemaHotel] для валидации выходных данных
 async def get_hotels(
-    paginatios: PaginationDep,
+    pagination: PaginationDep,
     db: DBDep,
     location: str | None = Query(default=None, description="Локация отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
@@ -55,7 +55,13 @@ async def get_hotels(
     #     offset=paginatios.per_page * (paginatios.page - 1),
     # )
 
-    return await db.hotels.get_filtered_by_time(date_from=date_from, date_to=date_to)
+    return await db.hotels.get_filtered_by_time(
+        date_from=date_from,
+        date_to=date_to,
+        title=title,
+        location=location,
+        pagination=pagination,
+    )
 
     # first = result.first()
     # result.one()  # выдаст ошибку, если вернулось ноль или больше одного
