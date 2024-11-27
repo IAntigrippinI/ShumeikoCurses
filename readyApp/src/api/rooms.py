@@ -66,16 +66,7 @@ async def edit_room(hotel_id: int, room_id: int, data: RoomsAddRequest, db: DBDe
     )
 
     
-    exists_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-    facilities_ids = [facility.facility_id for facility in exists_facilities]
-    add_facilities = [x for x in data.facilities_ids if x not in facilities_ids]
-    if len(add_facilities) != 0:
-        facilities_add_schemas = [RoomsFacilityAdd(room_id=room_id, facility_id=f) for f in add_facilities]
-        await db.rooms_facilities.add_bulk(facilities_add_schemas)
-
-    delete_facilities = [x.id for x in exists_facilities if x.facility_id not in data.facilities_ids and x.room_id == room_id]
-    if len(delete_facilities) != 0:
-        await db.rooms_facilities.delete_bulk(RoomsFacilitiesOrm.id.in_(delete_facilities))
+    db.rooms_facilities.set_room_facilities(room_id=room_id, facilities_ids=data.facilities_ids)
     await db.commit()
     return {"status": "OK"}
 
@@ -90,17 +81,7 @@ async def edit_partially_room(
     # data.hotel_id = hotel_id
 
     await db.rooms.edit(_room_data, is_patch=True, id=room_id, hotel_id=hotel_id)
-    if room_data.facilities_ids:
-        exists_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-        facilities_ids = [facility.facility_id for facility in exists_facilities]
-        add_facilities = [x for x in room_data.facilities_ids if x not in facilities_ids]
-        if len(add_facilities) != 0:
-            facilities_add_schemas = [RoomsFacilityAdd(room_id=room_id, facility_id=f) for f in add_facilities]
-            await db.rooms_facilities.add_bulk(facilities_add_schemas)
-
-        delete_facilities = [x.id for x in exists_facilities if x.facility_id not in room_data.facilities_ids and x.room_id == room_id]
-        if len(delete_facilities) != 0:
-            await db.rooms_facilities.delete_bulk(RoomsFacilitiesOrm.id.in_(delete_facilities))
+    db.rooms_facilities.set_room_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
     await db.commit()
     return {"status": "OK"}
 
