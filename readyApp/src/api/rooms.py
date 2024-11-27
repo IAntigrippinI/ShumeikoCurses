@@ -1,11 +1,9 @@
 from datetime import date
 
 from fastapi import APIRouter, Query
-from models.facilities import RoomsFacilitiesOrm
 from src.schemas.rooms import RoomsAdd, RoomsAddRequest, RoomsPatchRequest, RoomsPatch
-from src.schemas.facilities import RoomsFacility, RoomsFacilityAdd
+from src.schemas.facilities import RoomsFacilityAdd
 from src.database import async_session_maker
-from src.repositories.rooms import RoomsRepository
 from src.api.dependencies import DBDep
 
 router = APIRouter(prefix="/hotels", tags=["Номера"])
