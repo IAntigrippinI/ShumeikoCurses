@@ -1,12 +1,14 @@
 from pydantic import BaseModel, Field
 
+from schemas.facilities import Facility
+
 
 class RoomsAddRequest(BaseModel):
     title: str
     description: str | None = Field(None, description="Описание")
     price: int
     quantity: int
-    facilities_ids: list[int] | None = None
+    facilities_ids: list[int] = []
 
 class RoomsAdd(BaseModel):
     hotel_id: int = Field(description="id отеля")
@@ -19,13 +21,16 @@ class RoomsAdd(BaseModel):
 class Rooms(RoomsAdd):
     id: int
 
+class RoomWithRels(Rooms): #схема с зависимостями 
+    facilities: list[Facility]
+
 
 class RoomsPatchRequest(BaseModel):
     title: str | None = Field(None)
     description: str | None = Field(None)
     price: int | None = Field(None)
     quantity: int | None = Field(None)
-    facilities_ids: list[int] | None = None
+    facilities_ids: list[int] | None = []
 
 
 class RoomsPatch(BaseModel):
