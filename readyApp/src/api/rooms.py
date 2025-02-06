@@ -33,7 +33,7 @@ async def get_rooms(
 
 @router.get("/{hotel_id}/rooms/{room_id}")
 async def get_room(hotel_id: int, room_id: int, db: DBDep):
-    res = await db.rooms.get_filtered(hotel_id=hotel_id, id=room_id)
+    res = await db.rooms.get_with_facilities(hotel_id=hotel_id, room_id=room_id)
     return res
 
 
@@ -45,6 +45,7 @@ async def add_room(hotel_id: int, room_data: RoomsAddRequest, db: DBDep):
     await db.rooms_facilities.add_bulk(rooms_facilities_data)
     await db.commit()
     return {"status": "OK", "message": room}
+
 
 
 @router.put("/{hotel_id}/rooms/{room_id}", description="Изменение номера")
@@ -73,13 +74,16 @@ async def edit_room(hotel_id: int, room_id: int, data: RoomsAddRequest, db: DBDe
 async def edit_partially_room(
     hotel_id: int, room_id: int, room_data: RoomsPatchRequest, db: DBDep
 ):
+    _room_data_dict = room_data.model_dump(exclude_unset=True)
+
     _room_data = RoomsPatch(
-        hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True)
-    )
+        hotel_id=hotel_id, **_room_data_dict)
     # data.hotel_id = hotel_id
 
+
     await db.rooms.edit(_room_data, is_patch=True, id=room_id, hotel_id=hotel_id)
-    db.rooms_facilities.set_room_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
+    if "facilities_ids" in _room_data_dict:
+        await db.rooms_facilities.set_room_facilities(room_id=room_id, facilities_ids=_room_data_dict['facilities_ids'])
     await db.commit()
     return {"status": "OK"}
 
