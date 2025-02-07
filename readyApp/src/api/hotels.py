@@ -1,8 +1,7 @@
 from datetime import date
 
 from fastapi import Query, Body, APIRouter
-
-from sqlalchemy import insert, select, func
+from fastapi_cache.decorator import cache
 
 from src.models.hotels import HotelsOrm
 from src.schemas.hotels import Hotel, HotelPATCH, SchemaHotel, HotelAdd
@@ -12,6 +11,7 @@ from src.api.dependencies import PaginationDep, DBDep
 from src.database import async_session_maker
 from src.database import engine
 from src.repositories.hotels import HotelsRepository
+from src.utils.cache_decor import acache
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -36,6 +36,7 @@ async def get_hotel(hotel_id: int, db: DBDep):
     "",
     description="Здесь описание метода",
 )  # response_model=list[SchemaHotel] для валидации выходных данных
+@acache(expire=30)
 async def get_hotels(
     pagination: PaginationDep,
     db: DBDep,

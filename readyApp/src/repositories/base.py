@@ -1,10 +1,12 @@
 from sqlalchemy import func, select, insert, update, delete, or_
 from pydantic import BaseModel
 
+from src.repositories.mappers.base import DataMapper
+
 
 class BaseRepository:
     model = None
-    schema: BaseModel = None
+    mapper: DataMapper = None
 
     def __init__(self, session):
         self.session = session
@@ -13,7 +15,7 @@ class BaseRepository:
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         result = await self.session.execute(query)
         return [
-            self.schema.model_validate(model, from_attributes=True)
+            self.mapper.map_to_domain_entity(data=model)
             for model in result.scalars().all()
         ]
 
@@ -30,8 +32,7 @@ class BaseRepository:
         if model is None:
             return None
         else:
-
-            return self.schema.model_validate(model, from_attributes=True)
+            return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel):
         add_data_stmt = (
@@ -43,16 +44,13 @@ class BaseRepository:
 
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
+    
     
     async def add_bulk(self, data: list[BaseModel]): # bulk - много
         add_data_stmt = (
             insert(self.model).values([item.model_dump() for item in data]).returning(self.model)
         )
-        # print(
-        #     add_hotel_stmt.compile(compile_kwargs={"literal_binds": True})
-        # )  # для вывода скомпилированного запроса SQL
-
         await self.session.execute(add_data_stmt)
       
 
@@ -65,9 +63,11 @@ class BaseRepository:
         )
         await self.session.execute(update_stmt)
 
+
     async def delete(self, **filter_by):
         delete_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_stmt)
+
 
     async def delete_bulk(self, *filter,**filter_by):
         delete_stmt = delete(self.model).filter(*filter).filter_by(**filter_by)
