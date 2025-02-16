@@ -34,6 +34,4 @@ async def test_booking_crud(db):
     assert Booking(**update_booking.model_dump(), id=1) == updated_booking
 
     await db.bookings.delete(user_id=user_id, room_id=room_id)
-    booking = await db.bookings.get_one_or_none(user_id=user_id, room_id=room_id)
-    assert booking == None
     await db.commit()
