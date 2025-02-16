@@ -4,9 +4,15 @@ from src.database import async_session_maker_null_pool
 
 
 
-async def test_add_hotel():
+async def test_add_hotel(db):
     hotel_data = HotelAdd(title="Hotel 5 s", location="Анапа")
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        new_hotel_data = await db.hotels.add(hotel_data)
-        print(f"{new_hotel_data=}")
-        await db.commit()
+    new_hotel_data = await db.hotels.add(hotel_data)
+    print(f"{new_hotel_data=}")
+    await db.commit()
+
+
+async def test_add_hotel2(db):
+    hotel_data = HotelAdd(title="Hotel 5-8 s", location="Анапа")
+    new_hotel_data = await db.hotels.add(hotel_data)
+    print(f"{new_hotel_data=}")
+    await db.commit()

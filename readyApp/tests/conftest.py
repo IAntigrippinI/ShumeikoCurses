@@ -14,9 +14,17 @@ from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.models import *
 
+
+@pytest.fixture(scope='function')
+async def db() -> DBManager:
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
 @pytest.fixture(scope="session", autouse=True)
 def check_test_mode():
     assert settings.MODE == "TEST"
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database(check_test_mode): # эта функция выполнится после выполнения check_test_mode
@@ -29,27 +37,29 @@ async def setup_database(check_test_mode): # эта функция выполн�
 
 @pytest.fixture(scope='session', autouse=True)
 async def fill_database(setup_database):
-    with open("tests/mock_hotels.json") as f:
+    with open("tests/mock_hotels.json", encoding='utf-8') as f:
         json_data = json.load(f)
         hotels = TypeAdapter(list[HotelAdd]).validate_python(json_data)
-    with open("tests/mock_rooms.json") as f:
+        # or hotels = [HotelAdd.model_validate(hotel) for hotel in hotels]
+    with open("tests/mock_rooms.json", encoding='utf-8') as f:
         json_data = json.load(f)
         rooms = TypeAdapter(list[RoomsAdd]).validate_python(json_data)
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        for hotel in hotels:
-            await db.hotels.add(data=hotel)
-        await db.commit()
-        for room in rooms:
-            await db.rooms.add(data=room)
-        await db.commit()
+    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+        await db_.hotels.add_bulk(data=hotels)
+        await db_.rooms.add_bulk(data=rooms)
+        await db_.commit()
 
+
+@pytest.fixture(scope='session')
+async def ac() -> AsyncClient:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test1234") as ac:
+        yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def test_register_user(setup_database):
+async def test_register_user(setup_database, ac):
     print("Register user")
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test1234") as ac:
-        responce = await ac.post(
+    responce = await ac.post(
             "/auth/register",
             json={
                 "email": "kot@maul.ru",
@@ -57,4 +67,6 @@ async def test_register_user(setup_database):
             }
         )
 
-        print(responce.content)
+    print(responce.content)
+
+
