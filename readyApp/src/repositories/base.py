@@ -54,7 +54,6 @@ class BaseRepository:
         await self.session.execute(add_data_stmt)
       
 
-
     async def edit(self, data: BaseModel, is_patch: bool = False, **filter_by):
         update_stmt = (
             update(self.model)
