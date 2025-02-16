@@ -1,7 +1,15 @@
+from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def get_settings():
+    return Settings()
+
+
 class Settings(BaseSettings):
+
+    MODE: str
+
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -9,6 +17,10 @@ class Settings(BaseSettings):
     DB_NAME: str
     REDIS_HOST: str
     REDIS_PORT: int
+
+    @property
+    def REDIS_URL(self):
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
     # DSN - формат строки подключения
     @property
@@ -28,3 +40,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+print(f"MODE {settings.MODE}")
