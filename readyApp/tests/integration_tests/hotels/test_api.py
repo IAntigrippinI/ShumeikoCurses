@@ -1,5 +1,7 @@
+import pytest
 
 
+@pytest.mark.asyncio(scope="session")
 async def test_get_hotels(ac):
     responce = await ac.get(
         "/hotels",

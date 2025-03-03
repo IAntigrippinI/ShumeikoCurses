@@ -1,7 +1,17 @@
+from unittest import mock
+
+def empty_cache(*args, **kwargs):
+    def wrapper(func):
+        print("Use empty cache", func.__name__)
+        return func
+    return wrapper
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+# mock.patch("fastapi_cache.decorator.cache", empty_cache).start()
+# mock.patch("src.api.facilities.func", empty_cache).start()
 from httpx import AsyncClient, ASGITransport
 from dotenv import load_dotenv
 from pydantic import TypeAdapter
-from pytest_asyncio import is_async_test
 
 from src.api.dependencies import get_db
 from src.main import app
@@ -15,6 +25,7 @@ import json
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.models import *
+
 
 
 async def get_db_null_pool() -> DBManager:
@@ -32,7 +43,7 @@ async def db() -> DBManager:
 app.dependency_overrides[get_db] = get_db_null_pool # Переопределение каких-то зависимостей для тестов. В данной случае нужен session maker null pull для отработки тестов
 # Второй способ в database.py
 @pytest.fixture(scope="session", autouse=True)
-def check_test_mode():
+async def check_test_mode():
     assert settings.MODE == "TEST"
 
 
@@ -67,10 +78,12 @@ async def ac() -> AsyncClient:
             yield ac
 
 
+
+
 @pytest.fixture(scope="session", autouse=True)
 async def test_register_user(setup_database, ac):
     print("Register user")
-    responce = await ac.post(
+    response = await ac.post(
             "/auth/register",
             json={
                 "email": "kot@maul.ru",
@@ -78,6 +91,17 @@ async def test_register_user(setup_database, ac):
             }
         )
 
-    print(responce.content)
+    print(response.content)
 
 
+@pytest.fixture(scope='session', autouse=True)
+async def autheticated_ac(ac, test_register_user):
+    print('login USER')
+    response = await ac.post("/auth/login", json={"email": 'kot@maul.ru', "password": "1234"})
+    token = response.cookies.get("access_token", None)
+    ac_token = ac.cookies.get("access_token", None)
+    assert token
+    assert isinstance(token, str)
+    assert ac_token
+    assert ac_token == token
+    yield ac

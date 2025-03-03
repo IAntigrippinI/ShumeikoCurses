@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+# from fastapi_cache.backends.inmemory import InMemoryBackend для теста вместо редиса
 
 import sys
 from pathlib import Path
@@ -40,13 +41,19 @@ from src.init import redis_manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #При старе
+    #При старnе
     # asyncio.create_task(run_send_email_regularly()) # пример использования бэкграунд функций python
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
     yield
     #При перезагрузке/выключении приложения
-    await redis_manager.close()
+    if settings.MODE != "TEST":
+        print("RESTART REDIS")
+        await redis_manager.close()
+#
+if settings.MODE == "TEST":
+    FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+# FastAPICache.init(InMemoryBackend(), prefix='fastapi-cache')
 
 
 app = FastAPI(lifespan=lifespan)

@@ -36,7 +36,7 @@ async def get_hotel(hotel_id: int, db: DBDep):
     "",
     description="Здесь описание метода",
 )  # response_model=list[SchemaHotel] для валидации выходных данных
-# @acache(expire=30)
+@cache(expire=30)
 async def get_hotels(
     pagination: PaginationDep,
     db: DBDep,
