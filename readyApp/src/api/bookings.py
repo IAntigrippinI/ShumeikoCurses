@@ -27,13 +27,14 @@ async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddReq
     else:
 
         raise HTTPException(status_code=422, detail="Неверный id номера")
-    schema = await db.bookings.add(
+    schema = await db.bookings.add_booking(
         BookingAdd(
             user_id=user_id,
             price=price,
             create_at=datetime.now(),
             **booking_data.model_dump()
-        )
+        ),
+        hotel_id=room_data.hotel_id
     )
     await db.commit()
     return schema
