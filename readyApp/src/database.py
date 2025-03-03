@@ -4,8 +4,14 @@ from sqlalchemy.orm import DeclarativeBase
 
 from src.config import settings
 
+# 2 способ для фикса ошибки с пулом бд. Первый в tests/conftest.py
+# db_params = {}
+# if settings.MODE == "TEST":
+#     db_params = {"poolclass" : NullPool}
+
 engine = create_async_engine(
     settings.DB_URL,
+    # **db_params
 )  # echo=True для вывода SQL запроса в консоль
 
 engine_null_pool = create_async_engine(

@@ -29,11 +29,11 @@ async def test_booking_crud(db):
         create_at = datetime.datetime(2025,12,1),
     )
 
-    await db.bookings.edit(data=update_booking, user_id=user_id, room_id=room_id)
+    await db.bookings.edit(data=update_booking, id=booking.id)
     updated_booking = await db.bookings.get_one_or_none(room_id=room_id, user_id=user_id)
     assert Booking(**update_booking.model_dump(), id=1) == updated_booking
 
-    await db.bookings.delete(user_id=user_id, room_id=room_id)
+    await db.bookings.delete(id=booking.id)
     booking = await db.bookings.get_one_or_none(user_id=user_id, room_id=room_id)
     assert booking == None
     await db.commit()
