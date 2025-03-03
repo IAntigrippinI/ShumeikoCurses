@@ -1,7 +1,9 @@
 from httpx import AsyncClient, ASGITransport
 from dotenv import load_dotenv
 from pydantic import TypeAdapter
+from pytest_asyncio import is_async_test
 
+from src.api.dependencies import get_db
 from src.main import app
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomsAdd
@@ -15,12 +17,20 @@ from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.models import *
 
 
-@pytest.fixture(scope='function')
-async def db() -> DBManager:
+async def get_db_null_pool() -> DBManager:
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
 
+@pytest.fixture(scope='function')
+async def db() -> DBManager:
+    async for db in get_db_null_pool():
+        yield db
+
+
+
+app.dependency_overrides[get_db] = get_db_null_pool # Переопределение каких-то зависимостей для тестов. В данной случае нужен session maker null pull для отработки тестов
+# Второй способ в database.py
 @pytest.fixture(scope="session", autouse=True)
 def check_test_mode():
     assert settings.MODE == "TEST"
@@ -52,8 +62,9 @@ async def fill_database(setup_database):
 
 @pytest.fixture(scope='session')
 async def ac() -> AsyncClient:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test1234") as ac:
-        yield ac
+    async with app.router.lifespan_context(app):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test1234") as ac:
+            yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
