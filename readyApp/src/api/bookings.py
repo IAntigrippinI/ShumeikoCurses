@@ -22,10 +22,10 @@ async def get_my_bookings(user_id: UserIdDep, db: DBDep):
 @router.post("")
 async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddRequest):
     room_data = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    hotel = await db.hotels.get_one_or_none(id=room_data.hotel_id)
     if room_data:
         price = room_data.price
     else:
-
         raise HTTPException(status_code=422, detail="Неверный id номера")
     schema = await db.bookings.add_booking(
         BookingAdd(
@@ -34,7 +34,7 @@ async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddReq
             create_at=datetime.now(),
             **booking_data.model_dump()
         ),
-        hotel_id=room_data.hotel_id
+        hotel_id=hotel.id
     )
     await db.commit()
     return schema

@@ -49,8 +49,7 @@ def rooms_ids_for_booking( date_from: date, date_to: date, hotel_id: int | None 
             )
         )
 
-   
-
+    # print(rooms_ids_to_get.compile(compile_kwargs={"literal_binds": True}))
     return rooms_ids_to_get
 
 

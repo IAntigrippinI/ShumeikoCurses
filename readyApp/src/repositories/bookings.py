@@ -29,6 +29,7 @@ class BookingsRepository(BaseRepository):
             room_id for room_id in
             (await self.session.execute(rooms_ids_for_booking(date_from=booking_data.date_from, date_to=booking_data.date_to, hotel_id=hotel_id))).scalars().all()
         ]
+        print(free_rooms_ids)
         if booking_data.room_id not in free_rooms_ids:
             raise HTTPException(status_code=403, detail="Already busy")
         return await self.add(data=booking_data)
