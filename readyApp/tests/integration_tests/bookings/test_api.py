@@ -50,3 +50,45 @@ async def test_add_booking(
     if response.status_code == 200:
         res = response.json()
         assert isinstance(res, dict)
+
+
+@pytest.fixture(scope="function")
+async def delete_all_bookings(
+        db
+):
+    bookings = await db.bookings.get_all()
+
+    await db.bookings.delete_bulk(db.bookings.model.id.in_(range(1,len(bookings)+1)))
+    await db.commit()
+
+
+@pytest.mark.parametrize(
+"room_id, date_from, date_to, status_code, bookings_count" ,[
+    (1, "2025-04-20", "2025-04-19", 200, 1),
+    (1, "2025-04-20", "2025-04-19", 200, 2),
+    (1, "2025-04-20", "2025-04-19", 200, 3),
+    ]
+)
+async def test_add_and_get_bookings(
+        room_id, date_from, date_to, status_code, bookings_count,
+        delete_all_bookings,
+        autheticated_ac,
+
+):
+    response = await autheticated_ac.post(
+        "/bookings",
+        json={
+            "room_id": room_id,
+            "date_from": date_from,
+            "date_to": date_to,
+        }
+    )
+
+    assert response.status_code == status_code
+
+    response_bookings = await autheticated_ac.get(
+        "bookings/me"
+    )
+
+    assert len(response_bookings.json()) == bookings_count
+
