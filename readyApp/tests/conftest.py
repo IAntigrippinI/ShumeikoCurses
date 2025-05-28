@@ -1,5 +1,5 @@
 # ruff: noqa: E402 # чтобы ruff не ругался на импорты из проекта, вызванные после мока
-
+from typing import AsyncGenerator
 from unittest import mock
 
 
@@ -34,13 +34,13 @@ from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.models import *  # noqa - пишем noqa, чтобы ruff не считал это ошибкой. Можно добавть : F402, чтобы указать какую именно ошибку нужно игнорировать
 
 
-async def get_db_null_pool() -> DBManager:
+async def get_db_null_pool() -> AsyncGenerator[DBManager]:
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
 
 @pytest.fixture(scope="function")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager]:
     """
     scope=function: на каждый запуск функции прогоняется фикстура
     scope=module: запускается один раз при щапуске теста из этого файла (модуля)
@@ -52,7 +52,7 @@ async def db() -> DBManager:
 
 
 @pytest.fixture(scope="module")
-async def db_module() -> DBManager:
+async def db_module() -> AsyncGenerator[DBManager]:
     """
     scope=function: на каждый запуск функции прогоняется фикстура
     scope=module: запускается один раз при щапуске теста из этого файла (модуля)
@@ -101,7 +101,7 @@ async def fill_database(setup_database):
 
 
 @pytest.fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient]:
     async with app.router.lifespan_context(app):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test1234"

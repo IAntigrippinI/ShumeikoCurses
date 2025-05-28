@@ -1,7 +1,9 @@
 from datetime import datetime
 
+import sqlalchemy
 from fastapi import APIRouter, HTTPException
 from src.api.dependencies import DBDep, UserIdDep
+from src.exceptions import ObjectNotFoundException, AllRoomsAreBookedException
 from src.schemas.bookings import BookingAddRequest, BookingAdd
 
 
@@ -21,20 +23,23 @@ async def get_my_bookings(user_id: UserIdDep, db: DBDep):
 
 @router.post("")
 async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddRequest):
-    room_data = await db.rooms.get_one_or_none(id=booking_data.room_id)
-    hotel = await db.hotels.get_one_or_none(id=room_data.hotel_id)
-    if room_data:
-        price = room_data.price
-    else:
-        raise HTTPException(status_code=422, detail="Неверный id номера")
-    schema = await db.bookings.add_booking(
-        BookingAdd(
-            user_id=user_id,
-            price=price,
-            create_at=datetime.now(),
-            **booking_data.model_dump(),
-        ),
-        hotel_id=hotel.id,
-    )
+    try:
+        room_data = await db.rooms.get_one(id=booking_data.room_id)
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Номер не найден")
+    hotel = await db.hotels.get_one(id=room_data.hotel_id)
+    price = room_data.price
+    try:
+        schema = await db.bookings.add_booking(
+            BookingAdd(
+                user_id=user_id,
+                price=price,
+                create_at=datetime.now(),
+                **booking_data.model_dump(),
+            ),
+            hotel_id=hotel.id,
+        )
+    except AllRoomsAreBookedException as ex:
+        raise HTTPException(status_code=409, detail=ex.detail)
     await db.commit()
     return schema
