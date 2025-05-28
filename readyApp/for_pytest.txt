@@ -1,2 +1,5 @@
 pytest -v , чтобы писалось, об успехе или неудалче теста
 pytest -v -s для вывода print
+
+
+ pytest tests/integration_tests/bookings/test_api.py  - для запуска определенного теста
