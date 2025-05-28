@@ -17,7 +17,9 @@ async def registrer_user(data: UserRequestsAdd, db: DBDep):
 
         return {"status": "OK"}
     except Exception:
-        raise HTTPException(status_code=400, detail={"status": "error", "message": "email is busy"})
+        raise HTTPException(
+            status_code=400, detail={"status": "error", "message": "email is busy"}
+        )
 
 
 @router.post("/login")

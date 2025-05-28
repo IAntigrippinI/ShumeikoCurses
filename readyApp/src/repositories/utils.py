@@ -18,7 +18,9 @@ def rooms_ids_for_booking(date_from: date, date_to: date, hotel_id: int | None =
         select(
             RoomsOrm.id.label("room_id"),
             RoomsOrm.hotel_id,
-            (RoomsOrm.quantity - func.coalesce(rooms_booked.c.busy_rooms, 0)).label("free_rooms"),
+            (RoomsOrm.quantity - func.coalesce(rooms_booked.c.busy_rooms, 0)).label(
+                "free_rooms"
+            ),
             RoomsOrm.quantity,
             rooms_booked.c.busy_rooms,
         )

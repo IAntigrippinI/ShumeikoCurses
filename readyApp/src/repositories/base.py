@@ -14,7 +14,10 @@ class BaseRepository:
     async def get_filtered(self, *filter, **filter_by):
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(data=model) for model in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(data=model)
+            for model in result.scalars().all()
+        ]
 
     async def get_all(self, *args, **kwargs):
         return await self.get_filtered()
@@ -31,7 +34,9 @@ class BaseRepository:
             return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel):
-        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        add_data_stmt = (
+            insert(self.model).values(**data.model_dump()).returning(self.model)
+        )
         # print(
         #     add_hotel_stmt.compile(compile_kwargs={"literal_binds": True})
         # )  # для вывода скомпилированного запроса SQL
@@ -42,7 +47,9 @@ class BaseRepository:
 
     async def add_bulk(self, data: list[BaseModel]):  # bulk - много
         add_data_stmt = (
-            insert(self.model).values([item.model_dump() for item in data]).returning(self.model)
+            insert(self.model)
+            .values([item.model_dump() for item in data])
+            .returning(self.model)
         )
         await self.session.execute(add_data_stmt)
 
