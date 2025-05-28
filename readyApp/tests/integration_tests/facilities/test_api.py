@@ -1,4 +1,4 @@
-import pytest
+import pytest # noqa
 
 # @pytest.mark.asyncio(scope="session")
 async def test_get_facilities(ac):

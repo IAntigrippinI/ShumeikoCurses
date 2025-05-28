@@ -1,4 +1,4 @@
-from sqlalchemy import func, select, insert, update, delete, or_
+from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
 
 from src.repositories.mappers.base import DataMapper

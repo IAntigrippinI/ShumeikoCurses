@@ -3,7 +3,6 @@ from datetime import date
 from fastapi import APIRouter, Query
 from src.schemas.rooms import RoomsAdd, RoomsAddRequest, RoomsPatchRequest, RoomsPatch
 from src.schemas.facilities import RoomsFacilityAdd
-from src.database import async_session_maker
 from src.api.dependencies import DBDep
 
 router = APIRouter(prefix="/hotels", tags=["Номера"])
@@ -21,14 +20,6 @@ async def get_rooms(
     )
     return res
 
-
-@router.get("/{hotel_id}/rooms1")
-async def get_rooms(
-    hotel_id: int,
-    db: DBDep,
-):
-    res = await db.rooms.get_filtered(hotel_id=hotel_id)
-    return res
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
@@ -50,9 +41,9 @@ async def add_room(hotel_id: int, room_data: RoomsAddRequest, db: DBDep):
 
 @router.put("/{hotel_id}/rooms/{room_id}", description="Изменение номера")
 async def edit_room(hotel_id: int, room_id: int, data: RoomsAddRequest, db: DBDep):
-    room_data_add = RoomsAdd(hotel_id=hotel_id, **data.model_dump())
+    # room_data_add = RoomsAdd(hotel_id=hotel_id, **data.model_dump())
 
-    res = await db.rooms.edit(
+    await db.rooms.edit(
         data=RoomsAdd(
             hotel_id=hotel_id,
             title=data.title,
@@ -91,6 +82,6 @@ async def edit_partially_room(
 @router.delete("/{hotel_id}/rooms/{room_id}")
 async def delete_room(hotel_id: int, room_id: int, db: DBDep):
 
-    res = await db.rooms.delete(id=room_id, hotel_id=hotel_id)
+    await db.rooms.delete(id=room_id, hotel_id=hotel_id)
     await db.commit()
     return "OK"

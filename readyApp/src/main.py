@@ -1,4 +1,3 @@
-import asyncio
 from contextlib import asynccontextmanager
 import uvicorn
 
@@ -13,7 +12,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.api.dependencies import get_db
+from src.api.dependencies import get_db # noqa
 from src.api.hotels import (
     router as router_hotels,
 )  # для глобальных импортов от папки src

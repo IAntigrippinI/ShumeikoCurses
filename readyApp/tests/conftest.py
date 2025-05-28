@@ -1,3 +1,5 @@
+# ruff: noqa: E402 # чтобы ruff не ругался на импорты из проекта, вызванные после мока
+
 from unittest import mock
 
 def empty_cache(*args, **kwargs):
@@ -6,7 +8,7 @@ def empty_cache(*args, **kwargs):
         return func
     return wrapper
 
-mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start() # моки нужно вызывать раньше, чем импорты из других файлов проекта
 # mock.patch("fastapi_cache.decorator.cache", empty_cache).start()
 # mock.patch("src.api.facilities.func", empty_cache).start()
 from httpx import AsyncClient, ASGITransport
@@ -24,7 +26,7 @@ import pytest
 import json
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
-from src.models import *
+from src.models import * # noqa - пишем noqa, чтобы ruff не считал это ошибкой. Можно добавть : F402, чтобы указать какую именно ошибку нужно игнорировать
 
 
 

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, DATETIME, TIMESTAMP
+from sqlalchemy import ForeignKey, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 from src.database import Base

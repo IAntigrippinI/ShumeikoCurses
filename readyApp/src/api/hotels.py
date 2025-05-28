@@ -3,15 +3,10 @@ from datetime import date
 from fastapi import Query, Body, APIRouter
 from fastapi_cache.decorator import cache
 
-from src.models.hotels import HotelsOrm
-from src.schemas.hotels import Hotel, HotelPATCH, SchemaHotel, HotelAdd
+from src.schemas.hotels import HotelPATCH, HotelAdd
 
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.database import async_session_maker
-from src.database import engine
-from src.repositories.hotels import HotelsRepository
-from src.utils.cache_decor import acache
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -108,14 +103,13 @@ async def create_hotel(
     description="Здесь описание метода",
 )
 async def edit_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
-    async with async_session_maker() as session:
-        await db.hotels.edit(data=hotel_data, id=hotel_id)
-        await db.commit()
+    await db.hotels.edit(data=hotel_data, id=hotel_id)
+    await db.commit()
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частичная замена данных отеля")
-async def edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH, db: DBDep):
+async def part_edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH, db: DBDep):
 
     await db.hotels.edit(hotel_data, is_patch=True, id=hotel_id)
     await db.commit()

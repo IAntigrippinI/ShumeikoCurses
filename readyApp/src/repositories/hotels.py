@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import select, insert, func
+from sqlalchemy import select
 
 
 from src.repositories.base import BaseRepository

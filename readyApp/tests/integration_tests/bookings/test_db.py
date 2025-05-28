@@ -1,6 +1,6 @@
 import datetime
 
-from src.schemas.bookings import BookingAdd, Booking
+from src.schemas.bookings import BookingAdd
 
 
 async def test_booking_crud(db):
@@ -36,5 +36,5 @@ async def test_booking_crud(db):
 
     await db.bookings.delete(id=booking.id)
     booking = await db.bookings.get_one_or_none(id=new_booking.id)
-    assert booking == None
+    assert booking is None
     await db.commit()

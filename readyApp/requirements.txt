@@ -20,6 +20,7 @@ debugpy==1.8.5
 decorator==5.1.1
 dnspython==2.6.1
 email_validator==2.2.0
+exceptiongroup==1.2.2
 executing==2.0.1
 fastapi==0.111.1
 fastapi-cache2==0.2.2
@@ -83,6 +84,7 @@ SQLAlchemy==2.0.31
 stack-data==0.6.3
 starlette==0.37.2
 time-machine==2.15.0
+tomli==2.2.1
 tornado==6.4.1
 traitlets==5.14.3
 typer==0.12.3

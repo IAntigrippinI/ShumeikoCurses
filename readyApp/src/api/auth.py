@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Request
 
 from src.schemas.users import UserRequestsAdd, UserAdd
-from src.repositories.users import UsersRepository
-from src.database import async_session_maker
 from src.services.auth import AuthService
 from src.api.dependencies import UserIdDep, DBDep
 
@@ -19,7 +17,7 @@ async def registrer_user(data: UserRequestsAdd, db: DBDep):
         await db.commit()
 
         return {"status": "OK"}
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail= {"status": "error", "message": "email is busy"})
 
 
@@ -46,6 +44,6 @@ async def get_me(requests: Request, user_id: UserIdDep, db: DBDep):
 
 
 @router.post("/logout")
-async def logout(responce: Response):
-    responce.delete_cookie("access_token")
+async def logout(response: Response):
+    response.delete_cookie("access_token")
     return "OK"
