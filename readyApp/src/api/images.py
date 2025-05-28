@@ -4,6 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, UploadFile
 from src.tasks.tasks import resize_image
 
 router = APIRouter(prefix="/images", tags=["Изображения отелей"])
+
+
 @router.post("")
 def upload_image(file: UploadFile, background_tasks: BackgroundTasks):
     image_path = f"src/static/images/{file.filename}"

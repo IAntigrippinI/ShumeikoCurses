@@ -12,13 +12,14 @@ router = APIRouter(prefix="/facilities", tags=["Удобства"])
 def func():
     print("IT IS FUNC")
 
+
 @router.get("")
 @cache(expire=10)
 async def get_facilities(db: DBDep):
-    print('Иду в бд')
+    print("Иду в бд")
     test_task.delay()
     return await db.facilities.get_all()
-    
+
 
 @router.post("")
 async def create_facility(db: DBDep, facility_data: FacilityAdd):

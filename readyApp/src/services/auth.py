@@ -8,7 +8,6 @@ from src.config import settings
 
 
 class AuthService:
-
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def create_access_token(self, data: dict):

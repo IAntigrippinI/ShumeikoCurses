@@ -43,7 +43,6 @@ async def get_hotels(
     #     default=3, description="Кол-во объектов на странице", gt=1, lt=100
     # ),  ## gt  минимальное значение, lt максимальное значение, ge больше или равен
 ):
-
     # return await db.hotels.get_all(
     #     location=location,
     #     title=title,
@@ -110,7 +109,6 @@ async def edit_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
 
 @router.patch("/{hotel_id}", summary="Частичная замена данных отеля")
 async def part_edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH, db: DBDep):
-
     await db.hotels.edit(hotel_data, is_patch=True, id=hotel_id)
     await db.commit()
     return {"status": "OK"}
@@ -118,7 +116,6 @@ async def part_edit_hotel(hotel_id: int | None, hotel_data: HotelPATCH, db: DBDe
 
 @router.delete("/{hotel_id}")
 async def delete_hotel(hotel_id: int, db: DBDep):
-
     await db.hotels.delete(id=hotel_id)
     await db.commit()
     return {"status": "OK"}

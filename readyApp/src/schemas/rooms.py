@@ -10,6 +10,7 @@ class RoomsAddRequest(BaseModel):
     quantity: int
     facilities_ids: list[int] = []
 
+
 class RoomsAdd(BaseModel):
     hotel_id: int = Field(description="id отеля")
     title: str
@@ -21,7 +22,8 @@ class RoomsAdd(BaseModel):
 class Rooms(RoomsAdd):
     id: int
 
-class RoomWithRels(Rooms): #схема с зависимостями 
+
+class RoomWithRels(Rooms):  # схема с зависимостями
     facilities: list[Facility]
 
 

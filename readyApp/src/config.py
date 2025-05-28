@@ -6,7 +6,6 @@ def get_settings():
 
 
 class Settings(BaseSettings):
-
     MODE: str
 
     DB_HOST: str

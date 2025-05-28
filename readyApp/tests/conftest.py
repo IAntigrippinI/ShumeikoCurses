@@ -2,13 +2,18 @@
 
 from unittest import mock
 
+
 def empty_cache(*args, **kwargs):
     def wrapper(func):
         print("Use empty cache", func.__name__)
         return func
+
     return wrapper
 
-mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start() # моки нужно вызывать раньше, чем импорты из других файлов проекта
+
+mock.patch(
+    "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f
+).start()  # моки нужно вызывать раньше, чем импорты из других файлов проекта
 # mock.patch("fastapi_cache.decorator.cache", empty_cache).start()
 # mock.patch("src.api.facilities.func", empty_cache).start()
 from httpx import AsyncClient, ASGITransport
@@ -26,8 +31,7 @@ import pytest
 import json
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
-from src.models import * # noqa - пишем noqa, чтобы ruff не считал это ошибкой. Можно добавть : F402, чтобы указать какую именно ошибку нужно игнорировать
-
+from src.models import *  # noqa - пишем noqa, чтобы ruff не считал это ошибкой. Можно добавть : F402, чтобы указать какую именно ошибку нужно игнорировать
 
 
 async def get_db_null_pool() -> DBManager:
@@ -35,7 +39,7 @@ async def get_db_null_pool() -> DBManager:
         yield db
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 async def db() -> DBManager:
     """
     scope=function: на каждый запуск функции прогоняется фикстура
@@ -47,7 +51,7 @@ async def db() -> DBManager:
         yield db
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 async def db_module() -> DBManager:
     """
     scope=function: на каждый запуск функции прогоняется фикстура
@@ -59,9 +63,11 @@ async def db_module() -> DBManager:
         yield db_module
 
 
+app.dependency_overrides[get_db] = (
+    get_db_null_pool  # Переопределение каких-то зависимостей для тестов. В данной случае нужен session maker null pull для отработки тестов
+)
 
 
-app.dependency_overrides[get_db] = get_db_null_pool # Переопределение каких-то зависимостей для тестов. В данной случае нужен session maker null pull для отработки тестов
 # Второй способ в database.py
 @pytest.fixture(scope="session", autouse=True)
 async def check_test_mode():
@@ -69,7 +75,9 @@ async def check_test_mode():
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def setup_database(check_test_mode): # эта функция выполнится после выполнения check_test_mode
+async def setup_database(
+    check_test_mode,
+):  # эта функция выполнится после выполнения check_test_mode
     print("Я ФИКСТУРА")
     print(engine_null_pool.url)
     async with engine_null_pool.begin() as conn:
@@ -77,13 +85,13 @@ async def setup_database(check_test_mode): # эта функция выполн�
         await conn.run_sync(Base.metadata.create_all)
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 async def fill_database(setup_database):
-    with open("tests/mock_hotels.json", encoding='utf-8') as f:
+    with open("tests/mock_hotels.json", encoding="utf-8") as f:
         json_data = json.load(f)
         hotels = TypeAdapter(list[HotelAdd]).validate_python(json_data)
         # or hotels = [HotelAdd.model_validate(hotel) for hotel in hotels]
-    with open("tests/mock_rooms.json", encoding='utf-8') as f:
+    with open("tests/mock_rooms.json", encoding="utf-8") as f:
         json_data = json.load(f)
         rooms = TypeAdapter(list[RoomsAdd]).validate_python(json_data)
     async with DBManager(session_factory=async_session_maker_null_pool) as db_:
@@ -92,33 +100,31 @@ async def fill_database(setup_database):
         await db_.commit()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 async def ac() -> AsyncClient:
     async with app.router.lifespan_context(app):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test1234") as ac:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test1234"
+        ) as ac:
             yield ac
-
-
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def test_register_user(setup_database, ac):
     print("Register user")
     response = await ac.post(
-            "/auth/register",
-            json={
-                "email": "kot@maul.ru",
-                "password": "1234"
-            }
-        )
+        "/auth/register", json={"email": "kot@maul.ru", "password": "1234"}
+    )
 
     print(response.content)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 async def autheticated_ac(ac, test_register_user):
-    print('login USER')
-    response = await ac.post("/auth/login", json={"email": 'kot@maul.ru', "password": "1234"})
+    print("login USER")
+    response = await ac.post(
+        "/auth/login", json={"email": "kot@maul.ru", "password": "1234"}
+    )
     token = response.cookies.get("access_token", None)
     ac_token = ac.cookies.get("access_token", None)
     assert token

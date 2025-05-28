@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.api.dependencies import get_db # noqa
+from src.api.dependencies import get_db  # noqa
 from src.api.hotels import (
     router as router_hotels,
 )  # для глобальных импортов от папки src
@@ -40,15 +40,17 @@ from src.init import redis_manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #При старnе
+    # При старnе
     # asyncio.create_task(run_send_email_regularly()) # пример использования бэкграунд функций python
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
     yield
-    #При перезагрузке/выключении приложения
+    # При перезагрузке/выключении приложения
     if settings.MODE != "TEST":
         print("RESTART REDIS")
         await redis_manager.close()
+
+
 #
 if settings.MODE == "TEST":
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
@@ -64,5 +66,4 @@ app.include_router(router=router_bookings)
 app.include_router(router=router_images)
 
 if __name__ == "__main__":
-
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

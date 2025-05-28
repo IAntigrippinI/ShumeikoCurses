@@ -35,6 +35,7 @@ class UserWithHashPasswordDataMapper(DataMapper):
     db_model = UsersOrm
     schema = UserWithHashPassword
 
+
 class BookingDataMapper(DataMapper):
     db_model = BookingsOrm
     schema = Booking

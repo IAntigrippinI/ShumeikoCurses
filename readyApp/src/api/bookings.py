@@ -32,9 +32,9 @@ async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddReq
             user_id=user_id,
             price=price,
             create_at=datetime.now(),
-            **booking_data.model_dump()
+            **booking_data.model_dump(),
         ),
-        hotel_id=hotel.id
+        hotel_id=hotel.id,
     )
     await db.commit()
     return schema

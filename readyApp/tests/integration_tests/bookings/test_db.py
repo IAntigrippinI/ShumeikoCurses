@@ -7,12 +7,12 @@ async def test_booking_crud(db):
     user_id = (await db.users.get_all())[0].id
     room_id = (await db.rooms.get_all())[0].id
     booking_data = BookingAdd(
-        user_id = user_id,
-        room_id = room_id,
-        date_from = datetime.date(2025,12,12),
-        date_to = datetime.date(2025,12,21),
-        price = 100,
-        create_at = datetime.datetime(2025,12,12),
+        user_id=user_id,
+        room_id=room_id,
+        date_from=datetime.date(2025, 12, 12),
+        date_to=datetime.date(2025, 12, 21),
+        price=100,
+        create_at=datetime.datetime(2025, 12, 12),
     )
     new_booking = await db.bookings.add(booking_data)
     print(f"{new_booking=}")
@@ -22,12 +22,12 @@ async def test_booking_crud(db):
     # assert Booking(**booking_data.model_dump(), id=1) == booking
 
     update_booking = BookingAdd(
-        user_id = user_id,
-        room_id = room_id,
-        date_from = datetime.date(2025,12,1),
-        date_to = datetime.date(2025,12,21),
-        price = 1000,
-        create_at = datetime.datetime(2025,12,1),
+        user_id=user_id,
+        room_id=room_id,
+        date_from=datetime.date(2025, 12, 1),
+        date_to=datetime.date(2025, 12, 21),
+        price=1000,
+        create_at=datetime.datetime(2025, 12, 1),
     )
 
     await db.bookings.edit(data=update_booking, id=booking.id)

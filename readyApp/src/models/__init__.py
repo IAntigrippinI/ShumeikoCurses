@@ -11,4 +11,4 @@ __all__ = [
     "HotelsOrm",
     "UsersOrm",
     "RoomsOrm",
-] # для ruff
+]  # для ruff
