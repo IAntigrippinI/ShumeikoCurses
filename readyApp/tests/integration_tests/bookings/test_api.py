@@ -56,7 +56,7 @@ async def test_add_booking(
 
 @pytest.fixture(scope="module") # scope=function: на каждый запуск функции прогоняется фикстура
 async def delete_all_bookings(
-    db_module
+    # db_module
 ):
     """
     scope=function: на каждый запуск функции прогоняется фикстура
@@ -64,11 +64,11 @@ async def delete_all_bookings(
     scope=session: запускается один раз на весь тест
 
     """
-    # async for _db in get_db_null_pool(): # _db чтобы не было конфликтов с базовой фикстурой бд
-    #     await _db.bookings.delete()
-    #     await _db.commit() # 1 способ
-    await db_module.bookings.delete() # 2 способ
-    await db_module.commit()
+    async for _db in get_db_null_pool(): # _db чтобы не было конфликтов с базовой фикстурой бд
+        await _db.bookings.delete()
+        await _db.commit() # 1 способ
+    # await db_module.bookings.delete() # 2 способ
+    # await db_module.commit()
 
 
 @pytest.mark.parametrize(
