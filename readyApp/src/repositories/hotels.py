@@ -37,6 +37,7 @@ class HotelsRepository(BaseRepository):
         query = query.limit(pagination.per_page).offset(
             (pagination.page - 1) * pagination.per_page
         )
+
         result = await self.session.execute(query)
 
         return [

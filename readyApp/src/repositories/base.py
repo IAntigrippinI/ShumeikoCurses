@@ -3,9 +3,9 @@ import typing
 import sqlalchemy
 from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, UniqueKeyAlreadyUsedException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -64,8 +64,10 @@ class BaseRepository:
         # print(
         #     add_hotel_stmt.compile(compile_kwargs={"literal_binds": True})
         # )  # для вывода скомпилированного запроса SQL
-
-        result = await self.session.execute(add_data_stmt)
+        try:
+            result = await self.session.execute(add_data_stmt)
+        except IntegrityError:
+            raise UniqueKeyAlreadyUsedException
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 

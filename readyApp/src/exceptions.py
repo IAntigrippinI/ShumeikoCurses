@@ -11,3 +11,11 @@ class ObjectNotFoundException(BookingSiteException):
 
 class AllRoomsAreBookedException(BookingSiteException):
     detail = "Не осталось свободных номеров"
+
+
+class EmailIsUsedException(BookingSiteException):
+    detail = "Пользователь с такой почтой уже существует"
+
+
+class UniqueKeyAlreadyUsedException(BookingSiteException):
+    detail = "Нарушение уникальности записей"

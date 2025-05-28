@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Request
 
+from src.exceptions import UniqueKeyAlreadyUsedException
 from src.schemas.users import UserRequestsAdd, UserAdd
 from src.services.auth import AuthService
 from src.api.dependencies import UserIdDep, DBDep
@@ -8,7 +9,7 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 
 @router.post("/register")
-async def registrer_user(data: UserRequestsAdd, db: DBDep):
+async def register_user(data: UserRequestsAdd, db: DBDep):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
@@ -16,9 +17,9 @@ async def registrer_user(data: UserRequestsAdd, db: DBDep):
         await db.commit()
 
         return {"status": "OK"}
-    except Exception:
+    except UniqueKeyAlreadyUsedException:
         raise HTTPException(
-            status_code=400, detail={"status": "error", "message": "email is busy"}
+            status_code=409, detail={"status": "error", "message": "email is busy"}
         )
 
 
