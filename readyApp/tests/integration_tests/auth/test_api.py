@@ -29,15 +29,21 @@ async def test_user_api(
 
             assert response.status_code == status
             assert response.cookies.get("access_token", None)
+            assert "access_token" in ac.cookies
 
             #me
             response = await ac.get("/auth/me")
 
             assert response.status_code == status
-            assert response.json().get("email", None)
+            user = response.json()
+
+            assert user.get("email", None)
+            assert "password" not in user
+            assert "hashed_password" not in user
 
             #logout
             response = await ac.post("/auth/logout")
 
             assert response.status_code == status
             assert response.cookies.get("access_token", None) is None
+            assert "access_token" not in ac.cookies
