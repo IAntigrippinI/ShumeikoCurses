@@ -34,11 +34,7 @@ class HotelsRepository(BaseRepository):
             query = query.filter(HotelsOrm.location.ilike(f"%{location}%"))
         if title:
             query = query.filter(HotelsOrm.title.ilike(f"%{title}%"))
-        query = query.limit(pagination.per_page).offset(
-            (pagination.page - 1) * pagination.per_page
-        )
+        query = query.limit(pagination.per_page).offset((pagination.page - 1) * pagination.per_page)
         result = await self.session.execute(query)
 
-        return [
-            self.mapper.map_to_domain_entity(hotel) for hotel in result.scalars().all()
-        ]
+        return [self.mapper.map_to_domain_entity(hotel) for hotel in result.scalars().all()]

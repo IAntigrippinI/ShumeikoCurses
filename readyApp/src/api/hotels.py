@@ -66,9 +66,7 @@ async def get_hotels(
 # return hotels  # вернется адекватный json, хотя при выводе в консоль будут выводиться названия классов и адреса в памяти
 
 
-@router.post(
-    "", summary="добавление отеля", description="<h1>Здесь описание метода</h1>"
-)
+@router.post("", summary="добавление отеля", description="<h1>Здесь описание метода</h1>")
 async def create_hotel(
     db: DBDep,
     hotel_data: HotelAdd = Body(
