@@ -35,8 +35,27 @@ async def get_db_null_pool() -> DBManager:
 
 @pytest.fixture(scope='function')
 async def db() -> DBManager:
+    """
+    scope=function: на каждый запуск функции прогоняется фикстура
+    scope=module: запускается один раз при щапуске теста из этого файла (модуля)
+    scope=session: запускается один раз на весь тест
+
+    """
     async for db in get_db_null_pool():
         yield db
+
+
+@pytest.fixture(scope='module')
+async def db_module() -> DBManager:
+    """
+    scope=function: на каждый запуск функции прогоняется фикстура
+    scope=module: запускается один раз при щапуске теста из этого файла (модуля)
+    scope=session: запускается один раз на весь тест
+
+    """
+    async for db_module in get_db_null_pool():
+        yield db_module
+
 
 
 

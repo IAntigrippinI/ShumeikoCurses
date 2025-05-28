@@ -18,6 +18,8 @@
 #     assert response.status_code == 200
 import pytest
 
+from tests.conftest import get_db_null_pool
+
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
     (1, "2025-04-19", "2025-04-19", 200),
@@ -52,14 +54,21 @@ async def test_add_booking(
         assert isinstance(res, dict)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module") # scope=function: на каждый запуск функции прогоняется фикстура
 async def delete_all_bookings(
-        db
+    db_module
 ):
-    bookings = await db.bookings.get_all()
+    """
+    scope=function: на каждый запуск функции прогоняется фикстура
+    scope=module: запускается один раз при щапуске тестов из этого файла (модуля)/один раз для файла
+    scope=session: запускается один раз на весь тест
 
-    await db.bookings.delete_bulk(db.bookings.model.id.in_(range(1,len(bookings)+1)))
-    await db.commit()
+    """
+    # async for _db in get_db_null_pool(): # _db чтобы не было конфликтов с базовой фикстурой бд
+    #     await _db.bookings.delete()
+    #     await _db.commit() # 1 способ
+    await db_module.bookings.delete() # 2 способ
+    await db_module.commit()
 
 
 @pytest.mark.parametrize(
@@ -89,6 +98,7 @@ async def test_add_and_get_bookings(
     response_bookings = await autheticated_ac.get(
         "bookings/me"
     )
-
+    with open("test.txt", "a") as f:
+        f.write(f"\n\n{response_bookings.json()}")
     assert len(response_bookings.json()) == bookings_count
 
